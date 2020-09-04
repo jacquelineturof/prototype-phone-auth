@@ -37,7 +37,9 @@ export default function App() {
       .signInWithCredential(credential)
       .then((result) => {
         // Do something with the results here
-        console.log(result);
+        console.log(result.user);
+
+        // Make Ajax call to server w token and id
       });
   }
 
