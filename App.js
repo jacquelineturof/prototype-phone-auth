@@ -1,6 +1,7 @@
-import React, {useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Text, View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
+import axios from 'axios'
 
 import firebase from './firebase';
 
@@ -17,8 +18,22 @@ export default function App() {
 
   const recaptchaVerifier = useRef(null);
 
+  // const getTest = async () => {
+  //   try {
+  //     const response = await axios.get('http://localhost:8080/test')
+  //     console.log(response)
+  //   } catch (e) {
+  //     console.log(e)
+  //   }
+  // }
+
+  // useEffect(() => {
+  //   getTest()
+  // }, [])
+
   // Function to be called when requesting for a verification code
   const sendVerification = () => {
+
     const phoneProvider = new firebase.auth.PhoneAuthProvider();
     phoneProvider
       .verifyPhoneNumber(phoneNumber, recaptchaVerifier.current)
@@ -36,11 +51,24 @@ export default function App() {
       .auth()
       .signInWithCredential(credential)
       .then((result) => {
-        // Do something with the results here
-        console.log(result.user);
+          result.user.getIdToken()
+            .then(async token => {
+              console.log(token)
+              // fetch('http://localhost:8080/verify', {
+              //   method: 'POST',
+              //   headers: {
+              //     'Content-Type': 'application/json'
+              //   },
+              //   body: JSON.stringify({ token })
+              // })
+              const response = await axios.post('https://nameless-scrubland-96190.herokuapp.com/verify', { token })
+              console.log(response.data)
+            })
+            .catch(error => console.log(error))
 
-        // Make Ajax call to server w token and id
+        // Make Ajax call to server w token
       });
+
   }
 
   return (
@@ -68,7 +96,7 @@ export default function App() {
       />
 
       <TouchableOpacity onPress={confirmCode}>
-        <Text>Send Verification</Text>
+        <Text>Confirm Code</Text>
       </TouchableOpacity>
     </View>
   );
